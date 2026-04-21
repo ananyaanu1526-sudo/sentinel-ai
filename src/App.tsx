@@ -11,6 +11,7 @@ import Analyzer from "./pages/Analyzer";
 import Threats from "./pages/Threats";
 import ThreatDetail from "./pages/ThreatDetail";
 import Intelligence from "./pages/Intelligence";
+import Extension from "./pages/Extension";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/layout/AppLayout";
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/threats" element={<Threats />} />
               <Route path="/threats/:id" element={<ThreatDetail />} />
               <Route path="/intelligence" element={<Intelligence />} />
+              <Route path="/extension" element={<Extension />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
