@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sentinel.AI</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="hdr">
+      <div class="logo">
+        <span class="dot"></span>
+        <span class="brand">SENTINEL<span class="accent">.AI</span></span>
+      </div>
+      <span class="tag mono">PHISHING GUARD</span>
+    </header>
+
+    <main id="main">
+      <div class="url-row">
+        <span class="mono lbl">TARGET</span>
+        <span id="url" class="mono url" title=""></span>
+      </div>
+
+      <div id="state" class="state loading">
+        <div class="spinner"></div>
+        <div class="state-text mono">Analyzing with AI…</div>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="verdict-row">
+          <span id="verdict" class="verdict">—</span>
+          <span id="score" class="mono score">0/100</span>
+        </div>
+        <div class="meta mono" id="meta"></div>
+        <div class="section">
+          <div class="mono section-title">AI REASONING</div>
+          <p id="reasoning" class="reasoning"></p>
+        </div>
+        <div class="section">
+          <div class="mono section-title">INDICATORS</div>
+          <ul id="indicators" class="indicators"></ul>
+        </div>
+      </div>
+
+      <div id="error" class="error hidden mono"></div>
+
+      <button id="rescan" class="btn hidden">Re-scan</button>
+    </main>
+
+    <footer class="ftr mono">
+      <span>Latency: <span id="latency">—</span></span>
+      <a id="open-soc" href="#" target="_blank">Open SOC ↗</a>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
