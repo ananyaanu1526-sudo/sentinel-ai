@@ -171,21 +171,19 @@ Deno.serve(async (req) => {
   const t0 = Date.now();
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
+      authHeader ? { global: { headers: { Authorization: authHeader } } } : {}
     );
 
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Optional auth — extension and other anonymous clients still get a verdict,
+    // but only logged-in operators get the result persisted to their ledger.
+    let user: { id: string } | null = null;
+    if (authHeader) {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) user = { id: userData.user.id };
     }
-    const user = userData.user;
 
     const body = await req.json();
     const sourceType = String(body.source_type || "").toLowerCase();
@@ -247,6 +245,29 @@ Deno.serve(async (req) => {
                    : blendedScore >= 20 ? (llm.verdict === "safe" ? "suspicious" : llm.verdict)
                    : "safe";
 
+    const latency = Date.now() - t0;
+
+    // Anonymous (e.g. browser extension) — return verdict without persistence.
+    if (!user) {
+      const ephemeral = {
+        id: crypto.randomUUID(),
+        source_type: sourceType,
+        raw_input: rawInput,
+        target,
+        verdict,
+        risk_score: blendedScore,
+        confidence: llm.confidence,
+        indicators,
+        features,
+        ai_reasoning: llm.reasoning,
+        category: llm.category,
+        brand_impersonated: llm.brand_impersonated || null,
+      };
+      return new Response(JSON.stringify({ threat: ephemeral, latency_ms: latency, persisted: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const insertPayload = {
       user_id: user.id,
       source_type: sourceType,
@@ -265,7 +286,6 @@ Deno.serve(async (req) => {
     const { data: threat, error: insErr } = await supabase.from("threats").insert(insertPayload).select().single();
     if (insErr) throw insErr;
 
-    const latency = Date.now() - t0;
     await supabase.from("scans").insert({
       user_id: user.id,
       threat_id: threat.id,
@@ -273,7 +293,7 @@ Deno.serve(async (req) => {
       model: "google/gemini-2.5-flash",
     });
 
-    return new Response(JSON.stringify({ threat, latency_ms: latency }), {
+    return new Response(JSON.stringify({ threat, latency_ms: latency, persisted: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
