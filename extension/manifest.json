@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Sentinel.AI Phishing Guard",
+  "version": "1.0.0",
+  "description": "Real-time AI phishing analysis of the page you're visiting. Powered by Sentinel.AI SOC.",
+  "permissions": ["activeTab", "tabs", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

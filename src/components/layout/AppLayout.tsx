@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { ShieldCheck, LayoutDashboard, ScanSearch, AlertTriangle, Network, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, ScanSearch, AlertTriangle, Network, Chrome, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ const nav = [
   { to: "/analyzer", label: "Analyzer", icon: ScanSearch },
   { to: "/threats", label: "Threats", icon: AlertTriangle },
   { to: "/intelligence", label: "Intel graph", icon: Network },
+  { to: "/extension", label: "Extension", icon: Chrome },
 ];
 
 export const AppLayout = () => {
@@ -68,7 +69,7 @@ export const AppLayout = () => {
           <Button size="sm" variant="ghost" onClick={out}><LogOut className="w-4 h-4" /></Button>
         </header>
 
-        <div className="md:hidden grid grid-cols-4 border-b border-border bg-card text-xs">
+        <div className="md:hidden grid grid-cols-5 border-b border-border bg-card text-[10px]">
           {nav.map((n) => (
             <NavLink key={n.to} to={n.to}
               className={({ isActive }) => cn("py-2 flex flex-col items-center gap-1", isActive ? "text-primary" : "text-muted-foreground")}>
