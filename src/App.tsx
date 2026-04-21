@@ -1,12 +1,27 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import Analyzer from "./pages/Analyzer";
+import Threats from "./pages/Threats";
+import ThreatDetail from "./pages/ThreatDetail";
+import Intelligence from "./pages/Intelligence";
+import NotFound from "./pages/NotFound";
+import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
+
+const Protected = ({ children }: { children: JSX.Element }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen grid place-items-center text-muted-foreground mono">Initializing SOC…</div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return children;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -14,11 +29,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route element={<Protected><AppLayout /></Protected>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/analyzer" element={<Analyzer />} />
+              <Route path="/threats" element={<Threats />} />
+              <Route path="/threats/:id" element={<ThreatDetail />} />
+              <Route path="/intelligence" element={<Intelligence />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
